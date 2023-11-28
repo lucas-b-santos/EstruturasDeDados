@@ -2,14 +2,25 @@
 
 #define num_vertices 5
 
-void buscaProfundidade(SLList *gr, int ini, int *visitado, int cont = 1)
+void buscaLargura(SLList *gr, int ini, int *visitado, int cont = 1)
 {
+    SLList fila;
+    int vert;
     visitado[ini] = cont;
-
-    for (int i = 0; i < gr[ini].length; i++)
+    fila.addToResto(ini);
+    while (!fila.isEmpty())
     {
-        if (!visitado[gr[ini].getElemento(i)])
-            buscaProfundidade(gr, gr[ini].getElemento(i), visitado, cont + 1);
+        vert = fila.getElemento(0);
+        fila.deleteFromTopo();
+        cont++;
+        for (int i = 0; i < gr[vert].length; i++)
+        {
+            if (!visitado[gr[vert].getElemento(i)])
+            {
+                fila.addToResto(gr[vert].getElemento(i));
+                visitado[gr[vert].getElemento(i)] = cont;
+            }
+        }
     }
 }
 
@@ -38,10 +49,10 @@ int main()
         cout << "| " << i << " | -> ";
         grafo[i].printALL();
     }
-    
+
     cout << "ARRAY VISITADOS = | ";
 
-    buscaProfundidade(grafo, 0, visitados);
+    buscaLargura(grafo, 0, visitados);
 
     for (int i = 0; i < num_vertices; i++)
     {
