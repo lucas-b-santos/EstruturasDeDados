@@ -13,7 +13,7 @@ public:
         prox = 0; // s� instancia o objeto
     }
     SLLNode(int el, SLLNode *ptr = 0)
-    { // m�todo construtor com par�metro
+    { // metodo construtor com parametro
         info = el;
         prox = ptr; // intancia o objeto, coloca a informa��o e o ponteiro pr�ximo aponta para NULL (0 substitui o NULL)
     }
@@ -135,6 +135,17 @@ public:
             if (el == tmp->info) return true;
         }
         return false;
+    }
+
+    int getElemento(int indice) const {
+        int cont = 0;
+        for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
+        {
+            if (cont == indice) {
+                return tmp->info;
+            }
+            cont++;
+        }
     }
 
 
