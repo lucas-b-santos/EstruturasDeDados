@@ -17,7 +17,16 @@ public:
         info = el;
         prox = ptr; // intancia o objeto, coloca a informa��o e o ponteiro pr�ximo aponta para NULL (0 substitui o NULL)
     }
-    int info;   // informa��o do n�
+
+    SLLNode(int el, float peso, SLLNode *ptr = 0)
+    { // metodo construtor com parametro
+        info = el;
+        prox = ptr; // intancia o objeto, coloca a informa��o e o ponteiro pr�ximo aponta para NULL (0 substitui o NULL)
+        this->peso = peso;
+    }
+
+    int info;
+    float peso;
     SLLNode *prox; // ponteiro que aponta para o pr�ximo
 };
 
@@ -62,6 +71,20 @@ public:
         else
         {                                   // se a lista estiver vazia
             topo = resto = new SLLNode(el); // tanto o in�cio quanto o fim apontar�o para o n� inserido
+        }
+        length++;
+    }
+
+    void addPonderado(int el, float peso)
+    { // fun��o que adiciona o n� final
+        if (resto != 0)
+        {                                  // se a lista n�o estiver vazia
+            resto->prox = new SLLNode(el, peso); // o ponteiro de fim(resto), que est� no ultimo n�, aponta para o elemento novo, ou seja, conecta o n� anterior ao n� inserido no fim;
+            resto = resto->prox;           // o ponteiro de fim recebe esse novo elemento, ou seja, o n� inserido passa a ser o �ltimo;
+        }
+        else
+        {                                   // se a lista estiver vazia
+            topo = resto = new SLLNode(el, peso); // tanto o in�cio quanto o fim apontar�o para o n� inserido
         }
         length++;
     }
@@ -123,6 +146,17 @@ public:
         for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
         {                                   // percorre at� o n� ser nulo, ou seja, at� o final da lista
             cout << tmp->info << " | -> | "; // escreve o elemento do n�
+        }
+        cout << "NULL |" << endl; // pula linha
+    }
+
+    void printALLPonderado() const
+    {                              // const para sinalizar que a funcao nao altera as variaveis, mantendo-as constantes
+        cout << "| "; // pula linha
+
+        for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
+        {                                   // percorre at� o n� ser nulo, ou seja, at� o final da lista
+            cout << tmp->info << ", PESO = " << tmp->peso << " | -> | "; // escreve o elemento do n�
         }
         cout << "NULL |" << endl; // pula linha
     }

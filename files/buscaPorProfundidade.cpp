@@ -8,8 +8,10 @@ void buscaProfundidade(SLList *gr, int ini, int *visitado, int cont = 1)
 
     for (int i = 0; i < gr[ini].length; i++)
     {
-        if (!visitado[gr[ini].getElemento(i)])
+        if (!visitado[gr[ini].getElemento(i)]) {
+            cout << "VERTICE "<< gr[ini].getElemento(i) <<"; CONT = " << cont << endl;
             buscaProfundidade(gr, gr[ini].getElemento(i), visitado, cont + 1);
+        }
     }
 }
 
@@ -38,10 +40,12 @@ int main()
         cout << "| " << i << " | -> ";
         grafo[i].printALL();
     }
-    
-    cout << "ARRAY VISITADOS = | ";
 
     buscaProfundidade(grafo, 0, visitados);
+
+
+    cout << "ARRAY VISITADOS = | ";
+
 
     for (int i = 0; i < num_vertices; i++)
     {

@@ -21,6 +21,8 @@ void buscaLargura(SLList *gr, int ini, int *visitado, int cont = 1)
                 visitado[gr[vert].getElemento(i)] = cont;
             }
         }
+        cout << "FILA = ";
+        fila.printALL();
     }
 }
 
@@ -50,9 +52,9 @@ int main()
         grafo[i].printALL();
     }
 
-    cout << "ARRAY VISITADOS = | ";
-
     buscaLargura(grafo, 0, visitados);
+
+    cout << "ARRAY VISITADOS = | ";
 
     for (int i = 0; i < num_vertices; i++)
     {
