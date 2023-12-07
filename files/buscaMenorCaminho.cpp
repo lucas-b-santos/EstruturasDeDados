@@ -1,6 +1,6 @@
 #include "SLList.h"
 
-#define num_vertices 5
+#define num_vertices 6
 
 int procuraMenorDistancia(float *dist, int *visitado)
 {
@@ -45,14 +45,14 @@ SLList menorCaminho(SLList *gr, int ini, int destino, int *visitados, int *ant, 
             indice = gr[vert].getElemento(i);
             if (dist[indice] < 0)
             {
-                dist[indice] = dist[vert] + gr[vert].getPeso(i);
+                dist[indice] = dist[vert] + gr[vert].getPeso(gr[vert].getElemento(i));
                 ant[indice] = vert;
             }
             else
             {
-                if (dist[indice] > dist[vert] + gr[vert].getPeso(i))
+                if (dist[indice] > dist[vert] + gr[vert].getPeso(gr[vert].getElemento(i)))
                 {
-                    dist[indice] = dist[vert] + gr[vert].getPeso(i);
+                    dist[indice] = dist[vert] + gr[vert].getPeso(gr[vert].getElemento(i));
                 }
             }
         }
@@ -83,7 +83,7 @@ int main()
 
     // 0 = TOLEDO
     // 4 = FOZ DO IGUACU
-    
+
     grafo[0].addPonderado(1, 48);
     grafo[0].addPonderado(3, 33);
 
@@ -93,11 +93,16 @@ int main()
     grafo[2].addPonderado(1, 52);
     grafo[2].addPonderado(3, 16);
     grafo[2].addPonderado(4, 108);
+    grafo[2].addPonderado(5, 12);
 
     grafo[3].addPonderado(0, 33);
     grafo[3].addPonderado(2, 16);
 
     grafo[4].addPonderado(2, 108);
+    grafo[4].addPonderado(5, 4);
+
+    grafo[5].addPonderado(2, 12);
+    grafo[5].addPonderado(4, 4);
 
     for (int i = 0; i < num_vertices; i++)
     {
@@ -105,7 +110,7 @@ int main()
         grafo[i].printALLPonderado();
     }
 
-    SLList rota = menorCaminho(grafo, 1, 3, visitados, ant, dist);
+    SLList rota = menorCaminho(grafo, 0, 4, visitados, ant, dist);
 
     // cout << "A seguinte lista apresenta a menor rota entre Toledo (0) e Foz (4):" << endl;
     for (int i = 0; i < num_vertices; i++)
