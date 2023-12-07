@@ -83,15 +83,15 @@ int main()
 
     // 0 = TOLEDO
     // 4 = FOZ DO IGUACU
-
+    
     grafo[0].addPonderado(1, 48);
     grafo[0].addPonderado(3, 33);
 
     grafo[1].addPonderado(0, 48);
     grafo[1].addPonderado(2, 52);
 
-    grafo[2].addPonderado(3, 16);
     grafo[2].addPonderado(1, 52);
+    grafo[2].addPonderado(3, 16);
     grafo[2].addPonderado(4, 108);
 
     grafo[3].addPonderado(0, 33);
@@ -105,9 +105,21 @@ int main()
         grafo[i].printALLPonderado();
     }
 
-    SLList rota = menorCaminho(grafo, 0, 4, visitados, ant, dist);
+    SLList rota = menorCaminho(grafo, 1, 3, visitados, ant, dist);
 
-    cout << "A seguinte lista apresenta a menor rota entre Toledo (0) e Foz (4):" << endl;
+    // cout << "A seguinte lista apresenta a menor rota entre Toledo (0) e Foz (4):" << endl;
+    for (int i = 0; i < num_vertices; i++)
+    {
+        cout << dist[i] << " | ";
+    }
 
+    cout << endl;
+
+    for (int i = 0; i < num_vertices; i++)
+    {
+        cout << ant[i] << " | ";
+    }
+
+    cout << endl;
     rota.printALL();
 }
