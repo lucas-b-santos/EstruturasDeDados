@@ -78,12 +78,12 @@ public:
     void addPonderado(int el, float peso)
     { // fun��o que adiciona o n� final
         if (resto != 0)
-        {                                  // se a lista n�o estiver vazia
+        {                                        // se a lista n�o estiver vazia
             resto->prox = new SLLNode(el, peso); // o ponteiro de fim(resto), que est� no ultimo n�, aponta para o elemento novo, ou seja, conecta o n� anterior ao n� inserido no fim;
-            resto = resto->prox;           // o ponteiro de fim recebe esse novo elemento, ou seja, o n� inserido passa a ser o �ltimo;
+            resto = resto->prox;                 // o ponteiro de fim recebe esse novo elemento, ou seja, o n� inserido passa a ser o �ltimo;
         }
         else
-        {                                   // se a lista estiver vazia
+        {                                         // se a lista estiver vazia
             topo = resto = new SLLNode(el, peso); // tanto o in�cio quanto o fim apontar�o para o n� inserido
         }
         length++;
@@ -140,22 +140,22 @@ public:
     //_________________________________________________________________________________________________________________________________________________________________________________________//
 
     void printALL() const
-    {                              // const para sinalizar que a funcao nao altera as variaveis, mantendo-as constantes
+    {                 // const para sinalizar que a funcao nao altera as variaveis, mantendo-as constantes
         cout << "| "; // pula linha
 
         for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
-        {                                   // percorre at� o n� ser nulo, ou seja, at� o final da lista
+        {                                    // percorre at� o n� ser nulo, ou seja, at� o final da lista
             cout << tmp->info << " | -> | "; // escreve o elemento do n�
         }
         cout << "NULL |" << endl; // pula linha
     }
 
     void printALLPonderado() const
-    {                              // const para sinalizar que a funcao nao altera as variaveis, mantendo-as constantes
+    {                 // const para sinalizar que a funcao nao altera as variaveis, mantendo-as constantes
         cout << "| "; // pula linha
 
         for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
-        {                                   // percorre at� o n� ser nulo, ou seja, at� o final da lista
+        {                                                                // percorre at� o n� ser nulo, ou seja, at� o final da lista
             cout << tmp->info << ", PESO = " << tmp->peso << " | -> | "; // escreve o elemento do n�
         }
         cout << "NULL |" << endl; // pula linha
@@ -166,16 +166,19 @@ public:
     {
         for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
         {
-            if (el == tmp->info) return true;
+            if (el == tmp->info)
+                return true;
         }
         return false;
     }
 
-    int getElemento(int indice) const {
+    int getElemento(int indice) const
+    {
         int cont = 0;
         for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
         {
-            if (cont == indice) {
+            if (cont == indice)
+            {
                 return tmp->info;
             }
             cont++;
@@ -183,6 +186,19 @@ public:
         return 0;
     }
 
+    int getPeso(int indice) const
+    {
+        int cont = 0;
+        for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
+        {
+            if (cont == indice)
+            {
+                return tmp->peso;
+            }
+            cont++;
+        }
+        return 0;
+    }
 
     void addOrdenado(int el)
     {
