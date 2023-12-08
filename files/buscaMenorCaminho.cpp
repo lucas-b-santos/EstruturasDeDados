@@ -45,14 +45,15 @@ SLList menorCaminho(SLList *gr, int ini, int destino, int *visitados, int *ant, 
             indice = gr[vert].getElemento(i);
             if (dist[indice] < 0)
             {
-                dist[indice] = dist[vert] + gr[vert].getPeso(gr[vert].getElemento(i));
+                dist[indice] = dist[vert] + gr[vert].getPeso(indice);
                 ant[indice] = vert;
             }
             else
             {
-                if (dist[indice] > dist[vert] + gr[vert].getPeso(gr[vert].getElemento(i)))
+                if (dist[indice] > dist[vert] + gr[vert].getPeso(indice))
                 {
-                    dist[indice] = dist[vert] + gr[vert].getPeso(gr[vert].getElemento(i));
+                    dist[indice] = dist[vert] + gr[vert].getPeso(indice);
+                    ant[indice] = vert;
                 }
             }
         }

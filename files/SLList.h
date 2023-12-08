@@ -188,14 +188,12 @@ public:
 
     int getPeso(int elemento) const
     {
-        int cont = 0;
         for (SLLNode *tmp = topo; tmp != 0; tmp = tmp->prox)
         {
             if (tmp->info == elemento)
             {
                 return tmp->peso;
             }
-            cont++;
         }
         return 0;
     }
