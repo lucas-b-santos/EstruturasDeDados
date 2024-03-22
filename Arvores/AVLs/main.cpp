@@ -5,7 +5,7 @@
 
 int main()
 {
-  Arvore arvore;
+  ArvoreAVL arvore;
   int op, chave;
 
   int insercoes[] =  {50, 1, 64, 12, 18, 66, 38, 95, 58, 59, 70, 68, 39, 62, 60, 43, 16, 67, 34, 35};
@@ -30,20 +30,15 @@ int main()
     switch (op)
     {
     case 1:
-      cout << "Digite o numero da poltrona: ";
+      cout << "Digite o numero da chave: ";
       cin >> chave;
-      if (chave < 1)
-      {
-        cout << "Numero invalido de poltrona..." << endl;
-        break;
-      }
       arvore.inserir(chave);
       cout << endl;
       break;
     case 2:
       if (arvore.getRaiz() == 0)
       {
-        cout << "Nao ha reservas..." << endl;
+        cout << "Arvore vazia..." << endl;
         cout << endl;
       }
       else
@@ -55,7 +50,7 @@ int main()
     case 3:
       if (arvore.getRaiz() == 0)
       {
-        cout << "Nao ha reservas..." << endl;
+        cout << "Arvore vazia..." << endl;
         cout << endl;
       }
       else
@@ -67,7 +62,7 @@ int main()
     case 4:
       if (arvore.getRaiz() == 0)
       {
-        cout << "Nao ha reservas..." << endl;
+        cout << "Arvore vazia..." << endl;
         cout << endl;
       }
       else
@@ -79,21 +74,21 @@ int main()
     case 5:
       if (arvore.getRaiz() == 0)
       {
-        cout << "Nao ha reservas..." << endl;
+        cout << "Arvore vazia..." << endl;
         cout << endl;
       }
       else
       {
-        cout << "Digite o numero da poltrona: ";
+        cout << "Digite o numero da chave: ";
         cin >> chave;
-        if (arvore.removeArvore(chave))
+        if (arvore.remover(chave))
         {
-          cout << "Reserva removida com sucesso..." << endl;
+          cout << "Removido com sucesso..." << endl;
           cout << endl;
         }
         else
         {
-          cout << "Poltrona nao encontrada..." << endl;
+          cout << "Chave nao encontrada..." << endl;
           cout << endl;
         }
       }
@@ -113,7 +108,7 @@ int main()
     case 7:
       if (arvore.getRaiz() == 0)
       {
-        cout << "Nao ha reservas..." << endl;
+        cout << "Arvore vazia..." << endl;
         cout << endl;
       }
       else

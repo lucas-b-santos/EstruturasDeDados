@@ -243,83 +243,26 @@ private:
   int chave;
 
 public:
-  No(int chave, int altura = 0)
+  No(int chave)
   {
     this->chave = chave;
     esq = 0;
     dir = 0;
   }
-  int getChave() { return chave; }
-  No *getEsq() { return esq; }
-  No *getDir() { return dir; }
+
+  int getChave() const { return chave; }
+  No *getEsq() const { return esq; }
+  No *getDir() const { return dir; }
+
   void setEsq(No *no) { esq = no; }
   void setDir(No *no) { dir = no; }
+  void setChave(int chave) { this->chave = chave; }
 };
 
-class Arvore
+class ArvoreAVL
 {
 private:
   No *raiz;
-  int length;
-
-  void inserirAux(No *no, int chave)
-  {
-    if (chave < no->getChave())
-    {
-      if (no->getEsq() == 0)
-      {
-        No *novo_no = new No(chave);
-        no->setEsq(novo_no);
-      }
-      else
-      {
-        inserirAux(no->getEsq(), chave);
-      }
-    }
-    else if (chave > no->getChave())
-    {
-      if (no->getDir() == 0)
-      {
-        No *novo_no = new No(chave);
-        no->setDir(novo_no);
-      }
-      else
-      {
-        inserirAux(no->getDir(), chave);
-      }
-    }
-    else if (chave == no->getChave())
-    {
-      cout << "Numero ja existe...";
-    }
-  }
-
-  // funcao de remocao de no, recebe o no que queres remover
-  No *removerNo(No *noatual)
-  {
-    No *no1, *no2;
-    if (noatual->getEsq() == 0)
-    {
-      no2 = noatual->getDir();
-      free(noatual);
-      return no2;
-    }
-    no1 = noatual;
-    no2 = noatual->getEsq();
-    while (no2->getDir() != 0)
-    {
-      no1 = no2;
-      no2 = no2->getDir();
-    }
-    if (no1 != noatual)
-    {
-      no1->setDir(no2->getEsq());
-      no2->setEsq(noatual->getEsq());
-    }
-    no2->setDir(noatual->getDir());
-    free(noatual);
-    return no2;
-  }
 
   int fatorBalanceamento(No *raiz) const
   {
@@ -331,6 +274,7 @@ private:
     No *filhoR = no->getDir();
     no->setDir(filhoR->getEsq());
     filhoR->setEsq(no);
+    no = filhoR;
   }
 
   void rotacaoSimplesR(No *no)
@@ -338,61 +282,185 @@ private:
     No *filhoL = no->getEsq();
     no->setEsq(filhoL->getDir());
     filhoL->setDir(no);
+    no = filhoL;
   }
 
-  void realizaBalanceamento(No *no)
+  void auxRotacoesInserir(No *no)
   {
-    if (no != 0)
+    if (fatorBalanceamento(no) > 1)
     {
-      arvoreBalanceada(no->getEsq());
-      arvoreBalanceada(no->getDir());
-      if (fatorBalanceamento(no) > 1)
+      if (fatorBalanceamento(no->getDir()) < 0)
       {
-        if (fatorBalanceamento(no->getDir()) < 0)
-        {
-          rotacaoSimplesR(no->getDir());
-          rotacaoSimplesL(no);
-        }
-        else
-        {
-          rotacaoSimplesL(no);
-        }
+        // Dupla para a esquerda (RL)
+        rotacaoSimplesR(no->getDir());
+        rotacaoSimplesL(no);
       }
-      else if (fatorBalanceamento(no) < -1)
+      else
       {
-        if (fatorBalanceamento(no->getEsq()) > 0)
-        {
-          rotacaoSimplesL(no->getEsq());
-          rotacaoSimplesR(no);
-        }
-        else
-        {
-          rotacaoSimplesR(no);
-        }
+        // Simples para esquerda (RR)
+        rotacaoSimplesL(no);
+      }
+    }
+    else if (fatorBalanceamento(no) < -1)
+    {
+      if (fatorBalanceamento(no->getEsq()) > 0)
+      {
+        // Dupla para a Direita (LR)
+        rotacaoSimplesL(no->getEsq());
+        rotacaoSimplesR(no);
+      }
+      else
+      {
+        // Simples para a Direita (LL)
+        rotacaoSimplesR(no);
       }
     }
   }
 
+  void auxRotacoesRemover(No *no)
+  {
+    if (fatorBalanceamento(no) > 1)
+    {
+      if (fatorBalanceamento(no->getEsq()) > 0)
+      {
+        // Dupla para a Direita (LR)
+        rotacaoSimplesL(no->getEsq());
+        rotacaoSimplesR(no);
+      }
+      else
+      {
+        // Simples para a Direita (LL)
+        rotacaoSimplesR(no);
+      }
+    }
+    else if (fatorBalanceamento(no) < -1)
+    {
+
+      if (fatorBalanceamento(no->getDir()) < 0)
+      {
+        // Dupla para a esquerda (RL)
+        rotacaoSimplesR(no->getDir());
+        rotacaoSimplesL(no);
+      }
+      else
+      {
+        // Simples para esquerda (RR)
+        rotacaoSimplesL(no);
+      }
+    }
+  }
+
+  int inserirAux(No *no, int chave)
+  {
+    int res;
+
+    if (no == 0)
+    {
+      no = new No(chave);
+      return 1;
+    }
+
+    if (chave < no->getChave())
+    {
+      if ((res = inserirAux(no->getEsq(), chave)) == 1)
+      {
+        auxRotacoesInserir(no);
+      }
+    }
+    else if (chave > no->getChave())
+    {
+      if ((res = inserirAux(no->getDir(), chave)) == 1)
+      {
+        auxRotacoesInserir(no);
+      }
+    }
+    else
+    {
+      cout << "Numero ja existe...";
+      return 0;
+    }
+
+    return res;
+  }
+
+  No *procuraMenor(No *atual) const
+  {
+    No *no1 = atual, *no2 = atual->getEsq();
+    while (no2 != 0)
+    {
+      no1 = no2;
+      no2 = no2->getEsq();
+    }
+    return no1;
+  }
+
+  int removeAux(No *no, int chave)
+  {
+    if (no == 0)
+    {
+      cout << "Arvore vazia..." << endl;
+      return 0;
+    }
+
+    int res;
+
+    if (chave < no->getChave())
+    {
+      if ((res = removeAux(no->getEsq(), chave)) == 1)
+        auxRotacoesRemover(no);
+    }
+
+    if (no->getChave() < chave)
+    {
+      if ((res = removeAux(no->getDir(), chave)) == 1)
+        auxRotacoesRemover(no);
+    }
+
+    if (no->getChave() == chave)
+    {
+      if (no->getEsq() == 0 || no->getDir() == 0)
+      {
+        // Nó tem 1 filho ou nenhum
+        No *oldnode = no;
+        if (no->getEsq() != 0)
+          no = no->getEsq();
+        else
+          no = no->getDir();
+
+        free(oldnode);
+      }
+      else
+      { // nó tem 2 filhos
+
+        No *tmp = procuraMenor(no->getDir());
+        no->setChave(tmp->getChave());
+        removeAux(no->getDir(), no->getChave());
+        auxRotacoesRemover(no);
+      }
+
+      return 1;
+    }
+
+    return res;
+  }
+
 public:
-  Arvore()
+  ArvoreAVL()
   {
     raiz = 0;
-    length = 0;
   }
 
   void inserir(int chave)
   {
-    if (raiz == 0)
-    {
-      raiz = new No(chave);
-    }
-    else
-    {
-      inserirAux(raiz, chave);
-    }
+    inserirAux(raiz, chave);
+  }
 
-    realizaBalanceamento(raiz);
-    length++;
+  bool remover(int chave)
+  {
+    if (removeAux(raiz, chave))
+      return true;
+    else
+      return false;
   }
 
   No *getRaiz() const { return raiz; }
@@ -426,7 +494,7 @@ public:
       cout << no->getChave() << " ";
     }
   }
-  
+
   int retornaAltura(No *no) const
   {
     if (no == 0)
@@ -459,49 +527,6 @@ public:
       }
     }
     return true;
-  }
-
-  int removeArvore(int chave)
-  {
-    if (raiz == 0)
-    {
-      cout << "Arvore vazia..." << endl;
-    }
-    No *ant = 0;
-    No *noatual = raiz;
-    while (noatual != 0)
-    {
-      if (chave == noatual->getChave())
-      {
-        if (noatual == raiz)
-        {
-          raiz = removerNo(noatual);
-        }
-        else
-        {
-          if (ant->getDir() == noatual)
-          {
-            ant->setDir(removerNo(noatual));
-          }
-          else
-          {
-            ant->setEsq(removerNo(noatual));
-          }
-        }
-        length--;
-        return 1;
-      }
-      ant = noatual;
-      if (chave > noatual->getChave())
-      {
-        noatual = noatual->getDir();
-      }
-      else
-      {
-        noatual = noatual->getEsq();
-      }
-    }
-    return 0;
   }
 };
 
