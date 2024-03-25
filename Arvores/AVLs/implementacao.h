@@ -264,116 +264,158 @@ class ArvoreAVL
 private:
   No *raiz;
 
+  int retornaAltura(No *no) const
+  {
+    if (no == 0)
+    {
+      return -1;
+    }
+
+    int altEsq = retornaAltura(no->getEsq());
+    int altDir = retornaAltura(no->getDir());
+
+    if (altEsq > altDir)
+    {
+      return altEsq + 1;
+    }
+    else
+    {
+      return altDir + 1;
+    }
+  }
+
   int fatorBalanceamento(No *raiz) const
   {
     return retornaAltura(raiz->getDir()) - retornaAltura(raiz->getEsq());
   }
 
-  void rotacaoSimplesL(No *no)
+  No *rotacaoSimplesL(No **no)
   {
-    No *filhoR = no->getDir();
-    no->setDir(filhoR->getEsq());
-    filhoR->setEsq(no);
-    no = filhoR;
+    No *filhoR = (*no)->getDir();
+    (*no)->setDir(filhoR->getEsq());
+    filhoR->setEsq(*no);
+    *no = filhoR;
+    return filhoR;
   }
 
-  void rotacaoSimplesR(No *no)
+  No *rotacaoSimplesR(No **no)
   {
-    No *filhoL = no->getEsq();
-    no->setEsq(filhoL->getDir());
-    filhoL->setDir(no);
-    no = filhoL;
+    No *filhoL = (*no)->getEsq();
+    (*no)->setEsq(filhoL->getDir());
+    filhoL->setDir(*no);
+    *no = filhoL;
+    return filhoL;
   }
 
-  void auxRotacoesInserir(No *no)
+  void auxRotacoes(No **no, No **pai)
   {
-    if (fatorBalanceamento(no) > 1)
+    if (fatorBalanceamento(*no) > 1)
     {
-      if (fatorBalanceamento(no->getDir()) < 0)
+      No *filhoR = (*no)->getDir();
+
+      if (fatorBalanceamento(filhoR) < 0)
       {
+        cout << "Realiza dupla para a esquerda em " << (*no)->getChave() << endl;
+
         // Dupla para a esquerda (RL)
-        rotacaoSimplesR(no->getDir());
-        rotacaoSimplesL(no);
+        (*no)->setDir(rotacaoSimplesR(&filhoR));
+        if (pai == 0)
+          rotacaoSimplesL(no);
+        else if ((*pai)->getDir() == *no)
+          (*pai)->setDir(rotacaoSimplesL(no));
+        else
+          (*pai)->setEsq(rotacaoSimplesL(no));
       }
+
       else
       {
+        cout << "Realiza simples para a esquerda em " << (*no)->getChave() << endl;
+
         // Simples para esquerda (RR)
-        rotacaoSimplesL(no);
+        if (pai == 0)
+          rotacaoSimplesL(no);
+        else if ((*pai)->getDir() == *no)
+          (*pai)->setDir(rotacaoSimplesL(no));
+        else
+          (*pai)->setEsq(rotacaoSimplesL(no));
       }
     }
-    else if (fatorBalanceamento(no) < -1)
+
+    else if (fatorBalanceamento(*no) < -1)
+
     {
-      if (fatorBalanceamento(no->getEsq()) > 0)
+      No *filhoL = (*no)->getEsq();
+
+      if (fatorBalanceamento(filhoL) > 0)
       {
+        cout << "Realiza dupla para a direita em " << (*no)->getChave() << endl;
+
         // Dupla para a Direita (LR)
-        rotacaoSimplesL(no->getEsq());
-        rotacaoSimplesR(no);
+        (*no)->setEsq(rotacaoSimplesL(&filhoL));
+        if (pai == 0)
+          rotacaoSimplesR(no);
+        else if ((*pai)->getDir() == *no)
+          (*pai)->setDir(rotacaoSimplesR(no));
+        else
+          (*pai)->setEsq(rotacaoSimplesR(no));
       }
       else
       {
+        cout << "Realiza simples para a direita em " << (*no)->getChave() << endl;
+
         // Simples para a Direita (LL)
-        rotacaoSimplesR(no);
+        if (pai == 0)
+          rotacaoSimplesR(no);
+        else if ((*pai)->getDir() == *no)
+          (*pai)->setDir(rotacaoSimplesR(no));
+        else
+          (*pai)->setEsq(rotacaoSimplesR(no));
       }
     }
   }
 
-  void auxRotacoesRemover(No *no)
-  {
-    if (fatorBalanceamento(no) > 1)
-    {
-      if (fatorBalanceamento(no->getEsq()) > 0)
-      {
-        // Dupla para a Direita (LR)
-        rotacaoSimplesL(no->getEsq());
-        rotacaoSimplesR(no);
-      }
-      else
-      {
-        // Simples para a Direita (LL)
-        rotacaoSimplesR(no);
-      }
-    }
-    else if (fatorBalanceamento(no) < -1)
-    {
-
-      if (fatorBalanceamento(no->getDir()) < 0)
-      {
-        // Dupla para a esquerda (RL)
-        rotacaoSimplesR(no->getDir());
-        rotacaoSimplesL(no);
-      }
-      else
-      {
-        // Simples para esquerda (RR)
-        rotacaoSimplesL(no);
-      }
-    }
-  }
-
-  int inserirAux(No *no, int chave)
+  int inserirAux(No **no, No **pai, int chave, bool flag = true)
   {
     int res;
 
-    if (no == 0)
+    if (*no == 0)
     {
-      no = new No(chave);
+      *no = new No(chave);
+
+      if (pai != 0)
+      {
+        if (flag)
+        {
+          (*pai)->setDir(*no);
+          cout << "Inserindo " << (*pai)->getDir()->getChave() << " como filho a direita de " << (*pai)->getChave() << endl;
+        }
+
+        else
+        {
+          (*pai)->setEsq(*no);
+          cout << "Inserindo " << (*pai)->getEsq()->getChave() << " como filho a esquerda de " << (*pai)->getChave() << endl;
+        }
+      }
+
       return 1;
     }
 
-    if (chave < no->getChave())
+    if (chave < (*no)->getChave())
     {
-      if ((res = inserirAux(no->getEsq(), chave)) == 1)
-      {
-        auxRotacoesInserir(no);
-      }
+      No *filhoL = (*no)->getEsq();
+
+      if ((res = inserirAux(&filhoL, no, chave, false)) == 1)
+        auxRotacoes(no, pai);
     }
-    else if (chave > no->getChave())
+
+    else if (chave > (*no)->getChave())
     {
-      if ((res = inserirAux(no->getDir(), chave)) == 1)
-      {
-        auxRotacoesInserir(no);
-      }
+      No *filhoR = (*no)->getDir();
+
+      if ((res = inserirAux(&filhoR, no, chave)) == 1)
+        auxRotacoes(no, pai);
     }
+
     else
     {
       cout << "Numero ja existe...";
@@ -394,53 +436,70 @@ private:
     return no1;
   }
 
-  int removeAux(No *no, int chave)
+  int removeAux(No **no, No **pai, int chave)
   {
-    if (no == 0)
-    {
-      cout << "Arvore vazia..." << endl;
+    if (*no == 0)
       return 0;
-    }
 
     int res;
 
-    if (chave < no->getChave())
+    No *filhoL = (*no)->getEsq();
+    No *filhoR = (*no)->getDir();
+
+    if (chave < (*no)->getChave())
     {
-      if ((res = removeAux(no->getEsq(), chave)) == 1)
-        auxRotacoesRemover(no);
+      if ((res = removeAux(&filhoL, no, chave)) == 1)
+        auxRotacoes(no, pai);
     }
 
-    if (no->getChave() < chave)
+    if ((*no)->getChave() < chave)
     {
-      if ((res = removeAux(no->getDir(), chave)) == 1)
-        auxRotacoesRemover(no);
+      if ((res = removeAux(&filhoR, no, chave)) == 1)
+        auxRotacoes(no, pai);
     }
 
-    if (no->getChave() == chave)
+    if ((*no)->getChave() == chave)
     {
-      if (no->getEsq() == 0 || no->getDir() == 0)
-      {
-        // Nó tem 1 filho ou nenhum
-        No *oldnode = no;
-        if (no->getEsq() != 0)
-          no = no->getEsq();
+      bool flag, flag2 = false;
+
+      if (pai) {
+        flag2 = true;
+
+        if ((*pai)->getDir() == (*no))
+          flag = true;
         else
-          no = no->getDir();
+          flag = false;
+      }
+
+      if ((*no)->getEsq() == 0 || (*no)->getDir() == 0)
+      { // no tem um 1 filho ou nenhum
+
+        No *oldnode = *no;
+
+        if ((*no)->getEsq() != 0)
+          (*no) = (*no)->getEsq();
+        else
+          (*no) = (*no)->getDir();
 
         free(oldnode);
+
+        if (!flag2)
+          return 1;
+
+        if (flag)
+          (*pai)->setDir(*no);
+        else
+          (*pai)->setEsq(*no);
       }
       else
-      { // nó tem 2 filhos
-
-        No *tmp = procuraMenor(no->getDir());
-        no->setChave(tmp->getChave());
-        removeAux(no->getDir(), no->getChave());
-        auxRotacoesRemover(no);
+      { // no tem 2 filhos
+        No *tmp = procuraMenor((*no)->getDir());
+        (*no)->setChave(tmp->getChave());
+        removeAux(&filhoR, no, (*no)->getChave());
+        auxRotacoes(no, pai);
       }
-
       return 1;
     }
-
     return res;
   }
 
@@ -451,13 +510,14 @@ public:
   }
 
   void inserir(int chave)
+
   {
-    inserirAux(raiz, chave);
+    inserirAux(&raiz, 0, chave);
   }
 
   bool remover(int chave)
   {
-    if (removeAux(raiz, chave))
+    if (removeAux(&raiz, 0, chave))
       return true;
     else
       return false;
@@ -493,40 +553,6 @@ public:
       posOrdem(no->getDir());
       cout << no->getChave() << " ";
     }
-  }
-
-  int retornaAltura(No *no) const
-  {
-    if (no == 0)
-    {
-      return -1;
-    }
-
-    int altEsq = retornaAltura(no->getEsq());
-    int altDir = retornaAltura(no->getDir());
-
-    if (altEsq > altDir)
-    {
-      return altEsq + 1;
-    }
-    else
-    {
-      return altDir + 1;
-    }
-  }
-
-  bool arvoreBalanceada(No *no) const
-  {
-    if (no != 0)
-    {
-      arvoreBalanceada(no->getEsq());
-      arvoreBalanceada(no->getDir());
-      if (fatorBalanceamento(no) > 1 || fatorBalanceamento(no) < -1)
-      {
-        return false;
-      }
-    }
-    return true;
   }
 };
 

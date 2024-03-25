@@ -8,11 +8,15 @@ int main()
   ArvoreAVL arvore;
   int op, chave;
 
-  int insercoes[] =  {50, 1, 64, 12, 18, 66, 38, 95, 58, 59, 70, 68, 39, 62, 60, 43, 16, 67, 34, 35};
+  int insercoes[] = {7, 5, 3, 25, 10, 50, 30, 8, 20, 1, 64, 12, 18, 66, 38, 95, 58, 59, 70, 68, 39, 62, 60, 43, 16, 67, 34, 35};
 
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 28; i++)
     arvore.inserir(insercoes[i]);
-  }
+
+  cout << "==========================" << endl;
+
+  for (int i = 0; i < 28; i++)
+    arvore.remover(insercoes[i]);
 
   do
   {
@@ -22,7 +26,6 @@ int main()
          << "3:imprimir em ordem" << endl
          << "4:imprimir pos ordem" << endl
          << "5:remover" << endl
-         << "6:verificar balanco" << endl
          << "0:sair" << endl;
     cout << "Opcao: ";
     cin >> op;
@@ -71,6 +74,7 @@ int main()
         cout << endl;
       }
       break;
+
     case 5:
       if (arvore.getRaiz() == 0)
       {
@@ -93,34 +97,10 @@ int main()
         }
       }
       break;
-    case 6:
-      if (arvore.arvoreBalanceada(arvore.getRaiz()))
-      {
-        cout << "Arvore balanceada..." << endl;
-        cout << endl;
-      }
-      else
-      {
-        cout << "Arvore desbalanceada..." << endl;
-        cout << endl;
-      }
-      break;
-    case 7:
-      if (arvore.getRaiz() == 0)
-      {
-        cout << "Arvore vazia..." << endl;
-        cout << endl;
-      }
-      else
-      {
-        cout << "Altura da arvore: "
-             << arvore.retornaAltura(arvore.getRaiz()) - 1 << endl;
-        cout << endl;
-      }
-      break;
 
     case 0:
       return 0;
+
     default:
       cout << "Opcao invalida..." << endl;
     }
