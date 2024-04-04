@@ -1,3 +1,7 @@
+#Arquivos para armazenamento de registros
+*.bin
+*.dat
+
 # Prerequisites
 *.d
 
