@@ -42,18 +42,22 @@ struct Node
 };
 typedef struct Node node;
 
-// ##########################################################
-// Assinatura das funcoes que serao implementadas
+// ###########################Assinaturas das funcoes que serao implementadas###################################
 
 // encontra o antecessor de um elemento (maior elemento menor que o elemento em questao)
 void Antecessor(Apontador Ap, int Ind, Apontador ApPai, int *Diminuiu);
 
-// Realiza busca
-
+// Realiza busca de um registro no arquivo
 void Busca(Registro Reg, Apontador Ap);
+
 void em_ordem(Apontador raiz);
+
+//acessa uma pagina dentro do arquivo e busca um registro dentro dela
 void buscainFile(Registro Reg, Apontador pagina);
+
+//verifica se a pagina eh folha
 int isleaf(Apontador a);
+
 int file_exists(const char *filename);
 void Insere(Registro Reg, Apontador *Ap);
 void InsereNaPagina(Apontador Ap, Registro Reg, Apontador ApDir);
@@ -68,11 +72,18 @@ void Retira(int Ch, Apontador *Ap);
 void Ret(int Ch, Apontador *Ap, int *Diminuiu);
 void Reconstitui(Apontador ApPag, Apontador ApPai, int PosPai, int *Diminuiu);
 
-//percorre a arvore inteira, de maneira
+//percorre uma subarvore, de maneira a salvar todas as paginas a partir dela dentro do arquivo 
 void saveAux(Apontador p, int Nivel);
+
+//salva uma pagina efetivamente no arquivo
 void salvar(Apontador pagina, Registro Reg[]);
+
+//recupera todos os registros a partir do arquivo
 void recuperarReg(Apontador *arv, node *LISTA);
+
+//insere no inicio da lista simplesmente encadeada
 void insereInicio(Registro info, node *LISTA);
+
 void execut(Registro info, node *LISTA);
 void exibe(node *LISTA);
 
@@ -112,40 +123,64 @@ void Antecessor(Apontador Ap, int Ind, Apontador ApPai, int *Diminuiu)
   *Diminuiu = ApPai->n < ORDEM;
 } /* Antecessor */
 
+
+
 void Busca(Registro Reg, Apontador Ap)
 {
   int i;
 
+  //caso pagina vazia
   if (Ap == NULL) //
   {
     printf("chave nao encontrada: %d\n", Reg.chave);
     return;
   }
   i = 1;
+
+  //busca na pagina atual ate encontrar a chave ou a subarvore em que ela esta
   while (i < Ap->n && Reg.chave > Ap->r[i - 1].chave)
     i++;
+
+  //caso encontrou, mostra chave e busca os dados do registro no arquivo
   if (Reg.chave == Ap->r[i - 1].chave)
   {
     printf("chave: %d \n", Reg.chave);
     buscainFile(Ap->r[i - 1], Ap);
     return;
   }
+
+  //caso esteja na subarvore da esquerda, busca pela subarvore da esquerda 
   if (Reg.chave < Ap->r[i - 1].chave)
     Busca(Reg, Ap->p[i - 1]);
+
+  //caso contrario busca pela subarvore da direita
   else
     Busca(Reg, Ap->p[i]);
 }
 
 void buscainFile(Registro Reg, Apontador pagina)
 {
+
   Registro reg[2 * ORDEM];
   int i;
+  
+  //abre arquivo
   FILE *arq = fopen(namefile, "rb");
+  
+  //caso na abertura, encerra programa
   if (arq == NULL)
     exit(1);
+
+  //seta cursor para a pagina em questao
   fseek(arq, pagina->pageNum * (2 * ORDEM * sizeof(Registro)), SEEK_SET);
+  
+  //le informacoes para o registro
   fread(reg, (2 * ORDEM * sizeof(Registro)), 1, arq);
+  
+  //fecha arquivo
   fclose(arq);
+
+  //acessa todos os registros da pagina, buscando o registro desejado
   for (i = 0; i < 2 * ORDEM; i++)
   {
     if (Reg.chave == reg[i].chave)
@@ -827,7 +862,8 @@ int main()
   arv = (Apontador *)malloc(sizeof(Apontador));
   node *LISTA = (node *)malloc(sizeof(node));
   Inicializa(arv);
-  inicia(LISTA); {
+  inicia(LISTA); 
+  if (file_exists(namefile)) {
     recuperarReg(arv, LISTA);
   }
   printf("i - insercao \n");
