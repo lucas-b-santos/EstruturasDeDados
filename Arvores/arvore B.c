@@ -27,9 +27,9 @@ typedef struct Pagina_str *Apontador;
 // Estrutura da pagina
 typedef struct Pagina_str
 {
-  int n;
-  int pageNum;
-  int num;
+  int n;                      // quantidade de registros armazenados na pagina
+  int pageNum;                // indice da pagina dentro do arquivo
+  int num;                    //
   Registro r[2 * ORDEM];      // registros armazenados na pagina
   Apontador p[2 * ORDEM + 1]; // ponteiros que apontam para as paginas filhas
 } Pagina;
@@ -52,15 +52,22 @@ void Busca(Registro Reg, Apontador Ap);
 
 void em_ordem(Apontador raiz);
 
-//acessa uma pagina dentro do arquivo e busca um registro dentro dela
+// acessa uma pagina dentro do arquivo e busca um registro dentro dela
 void buscainFile(Registro Reg, Apontador pagina);
 
-//verifica se a pagina eh folha
+// verifica se a pagina e folha
 int isleaf(Apontador a);
 
+// verifica se o arquivo ja existe
 int file_exists(const char *filename);
+
+// Percorre arvore ate encontrar pagina ideal (caso exista) para inserir
 void Insere(Registro Reg, Apontador *Ap);
+
+// Insere registro na posicao correta dentro da pagina
 void InsereNaPagina(Apontador Ap, Registro Reg, Apontador ApDir);
+
+// Percorre arvore ate encontrar pagina ideal (caso exista) para inserir
 void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontador *ApRetorno);
 int Imprime2(Apontador p, int Nivel, int aux, int n);
 int Imprime(Apontador p, int N, int aux, int n);
@@ -72,19 +79,22 @@ void Retira(int Ch, Apontador *Ap);
 void Ret(int Ch, Apontador *Ap, int *Diminuiu);
 void Reconstitui(Apontador ApPag, Apontador ApPai, int PosPai, int *Diminuiu);
 
-//percorre uma subarvore, de maneira a salvar todas as paginas a partir dela dentro do arquivo 
+// percorre uma subarvore, de maneira a salvar todas as paginas a partir dela dentro do arquivo
 void saveAux(Apontador p, int Nivel);
 
-//salva uma pagina efetivamente no arquivo
+// salva uma pagina efetivamente no arquivo
 void salvar(Apontador pagina, Registro Reg[]);
 
-//recupera todos os registros a partir do arquivo
+// recupera todos os registros a partir do arquivo
 void recuperarReg(Apontador *arv, node *LISTA);
 
-//insere no inicio da lista simplesmente encadeada
+// insere no inicio da lista simplesmente encadeada
 void insereInicio(Registro info, node *LISTA);
 
+// inicia processo de inserir no inicio da lista
 void execut(Registro info, node *LISTA);
+
+// exibe lista
 void exibe(node *LISTA);
 
 typedef Apontador TipoDicionario;
@@ -123,13 +133,11 @@ void Antecessor(Apontador Ap, int Ind, Apontador ApPai, int *Diminuiu)
   *Diminuiu = ApPai->n < ORDEM;
 } /* Antecessor */
 
-
-
 void Busca(Registro Reg, Apontador Ap)
 {
   int i;
 
-  //caso pagina vazia
+  // caso pagina vazia
   if (Ap == NULL) //
   {
     printf("chave nao encontrada: %d\n", Reg.chave);
@@ -137,11 +145,11 @@ void Busca(Registro Reg, Apontador Ap)
   }
   i = 1;
 
-  //busca na pagina atual ate encontrar a chave ou a subarvore em que ela esta
+  // busca na pagina atual ate encontrar a chave ou a subarvore em que ela esta
   while (i < Ap->n && Reg.chave > Ap->r[i - 1].chave)
     i++;
 
-  //caso encontrou, mostra chave e busca os dados do registro no arquivo
+  // caso encontrou, mostra chave e busca os dados do registro no arquivo
   if (Reg.chave == Ap->r[i - 1].chave)
   {
     printf("chave: %d \n", Reg.chave);
@@ -149,11 +157,11 @@ void Busca(Registro Reg, Apontador Ap)
     return;
   }
 
-  //caso esteja na subarvore da esquerda, busca pela subarvore da esquerda 
+  // caso esteja na subarvore da esquerda, busca pela subarvore da esquerda
   if (Reg.chave < Ap->r[i - 1].chave)
     Busca(Reg, Ap->p[i - 1]);
 
-  //caso contrario busca pela subarvore da direita
+  // caso contrario busca pela subarvore da direita
   else
     Busca(Reg, Ap->p[i]);
 }
@@ -163,24 +171,24 @@ void buscainFile(Registro Reg, Apontador pagina)
 
   Registro reg[2 * ORDEM];
   int i;
-  
-  //abre arquivo
+
+  // abre arquivo
   FILE *arq = fopen(namefile, "rb");
-  
-  //caso na abertura, encerra programa
+
+  // caso falha na abertura, encerra programa
   if (arq == NULL)
     exit(1);
 
-  //seta cursor para a pagina em questao
+  // seta cursor para a pagina em questao
   fseek(arq, pagina->pageNum * (2 * ORDEM * sizeof(Registro)), SEEK_SET);
-  
-  //le informacoes para o registro
+
+  // le informacoes para o registro
   fread(reg, (2 * ORDEM * sizeof(Registro)), 1, arq);
-  
-  //fecha arquivo
+
+  // fecha arquivo
   fclose(arq);
 
-  //acessa todos os registros da pagina, buscando o registro desejado
+  // acessa todos os registros da pagina, buscando o registro desejado
   for (i = 0; i < 2 * ORDEM; i++)
   {
     if (Reg.chave == reg[i].chave)
@@ -229,24 +237,36 @@ void InsereNaPagina(Apontador Ap, Registro Reg, Apontador ApDir)
   int k;
   int NaoAchouPosicao;
 
+  // k = quantidade de elementos na pagina
   k = Ap->n;
+
   NaoAchouPosicao = k > 0;
+
+  // percorre pagina a partir da maior chave
   while (NaoAchouPosicao)
   {
+
+    // caso encontrou posicao, sai do while
     if (Reg.chave >= Ap->r[k - 1].chave)
     {
       NaoAchouPosicao = 0;
       break;
     }
 
+    /*desloca chave e ponteiro para a direita, de maneira que se tenha
+    espaco para inserir a chave na ordem correta*/
     Ap->r[k] = Ap->r[k - 1];
-
     Ap->p[k + 1] = Ap->p[k];
 
+    // decrementa contador
     k--;
+
+    // caso registro deva ser colocado na primeira posicao da pagina
     if (k < 1)
       NaoAchouPosicao = 0;
   }
+
+  // Insere registro, seta o apontador direito e incrementa contador de elementos
   Ap->r[k] = Reg;
   Ap->p[k + 1] = ApDir;
   Ap->n++;
@@ -258,11 +278,10 @@ void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontad
   Registro Aux;
   int i, j;
 
-
-  //caso apontador nulo
+  /*caso apontador da pagina nulo, se assume que arvore vai crescer
+  em tamanho*/
   if (Ap == NULL)
   {
-    //indica que a arvore vai crescer em altura
     *Cresceu = 1;
     *RegRetorno = Reg;
     *ApRetorno = NULL;
@@ -271,12 +290,11 @@ void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontad
 
   i = 1;
 
-  //busca a posicao de insercao do registro dentro da pagina
+  // busca a posicao de insercao do registro dentro da pagina
   while (i < Ap->n && Reg.chave > Ap->r[i - 1].chave)
     i++;
 
-
-  //caso chave ja exista na pagina
+  // caso chave ja exista na pagina
   if (Reg.chave == Ap->r[i - 1].chave)
   {
     printf("chave ja existente: %d \n", Reg.chave);
@@ -284,40 +302,61 @@ void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontad
     return;
   }
 
-  //caso chave esteja no intervalo menor que "Ap->r[i - 1].chave"
+  // caso chave deva ser inserida na esquerda
   if (Reg.chave < Ap->r[i - 1].chave)
     Ins(Reg, Ap->p[i - 1], Cresceu, RegRetorno, ApRetorno);
 
-  //caso chave esteja no intervalo maior que "Ap->r[i - 1].chave"
+  // caso contrario
   else
     Ins(Reg, Ap->p[i], Cresceu, RegRetorno, ApRetorno);
 
+  /*Chave ja existe ou foi inserida em pagina existente, retorna
+  e nao executa os outros passos*/
   if (!*Cresceu)
     return;
-  
-  if (Ap->n < 2 * ORDEM)
-  { /* Verificando se a pagina tem espaco */
+
+  if (Ap->n < 2 * ORDEM) /*Verificando se a pagina tem espaco */
+  {
+
+    // caso tenha espaco, usa funcao para inserir na pagina
     InsereNaPagina(Ap, *RegRetorno, *ApRetorno);
     *Cresceu = 0;
     return;
   }
+
   /* Split: Pagina tem que ser dividida */
+
+  // Cria nova pagina
   ApTemp = (Apontador)malloc(sizeof(Pagina));
+
+  // Seta valores iniciais da nova pagina
   ApTemp->n = 0;
   ApTemp->p[0] = NULL;
   cont++;
   ApTemp->pageNum = cont;
 
+  // caso registro deve ser inserido ate segunda metade das chaves da pagina
   if (i <= ORDEM + 1)
   {
+    // adiciona ultimo elemento na nova pagina
     InsereNaPagina(ApTemp, Ap->r[2 * ORDEM - 1], Ap->p[2 * ORDEM]);
+
+    // decrementa quantidade de elementos dentro da pagina que vai ser inserido novo registro
     Ap->n--;
+
+    // insere novo registro na pagina
     InsereNaPagina(Ap, *RegRetorno, *ApRetorno);
   }
+
+  // caso contrario
   else
   {
+
+    // adiciona registro na nova pagina
     InsereNaPagina(ApTemp, *RegRetorno, *ApRetorno);
   }
+
+  // adiciona os elementos que estavam faltando na nova pagina
   for (j = ORDEM + 2; j <= 2 * ORDEM; j++)
     InsereNaPagina(ApTemp, Ap->r[j - 1], Ap->p[j]);
 
@@ -335,7 +374,6 @@ void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontad
 
 void Insere(Registro Reg, Apontador *Ap)
 {
-
   int Cresceu;
   Registro RegRetorno;
   Apontador ApRetorno;
@@ -343,7 +381,7 @@ void Insere(Registro Reg, Apontador *Ap)
 
   Ins(Reg, *Ap, &Cresceu, &RegRetorno, &ApRetorno);
   if (Cresceu)
-  { /* Se arvore cresce na altura pela raiz */
+  { /* Se arvore cresce na altura pela raiz*/
     ApTemp = (Apontador)malloc(sizeof(Pagina));
     ApTemp->n = 1;
     ApTemp->r[0] = RegRetorno;
@@ -352,8 +390,8 @@ void Insere(Registro Reg, Apontador *Ap)
     ApTemp->pageNum = cont;
     ApTemp->p[0] = *Ap;
     *Ap = ApTemp;
-    // save in file
   }
+  // salva alteracoes no arquivo
   saveAux(*Ap, 2 * ORDEM);
 } /*Insercao*/
 
@@ -455,8 +493,10 @@ void InsPosFile(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, 
     InsPosFile(Reg, Ap->p[i - 1], Cresceu, RegRetorno, ApRetorno);
   else
     InsPosFile(Reg, Ap->p[i], Cresceu, RegRetorno, ApRetorno);
+
   if (!*Cresceu)
     return;
+    
   if (Ap->n < 2 * ORDEM)
   { /* Verificando se a pagina tem espaco */
     InsereNaPagina(Ap, *RegRetorno, *ApRetorno);
@@ -480,6 +520,7 @@ void InsPosFile(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, 
   {
     InsereNaPagina(ApTemp, *RegRetorno, *ApRetorno);
   }
+
   for (j = ORDEM + 2; j <= 2 * ORDEM; j++)
     InsereNaPagina(ApTemp, Ap->r[j - 1], Ap->p[j]);
 
@@ -669,7 +710,6 @@ void Retira(int Ch, Apontador *Ap)
 
 } /* Retira */
 
-//Carrega registros do arquivo para a Arvore
 void recuperarReg(Apontador *arv, node *LISTA)
 {
 
@@ -678,54 +718,55 @@ void recuperarReg(Apontador *arv, node *LISTA)
   node *tmp;
   int i = 0, j = 0, tam;
 
-  //Abre arquivo
+  // Abre arquivo
   arq = fopen(namefile, "rb");
 
-  //caso abertura falhou, encerra programa
+  // caso abertura falhou, encerra programa
   if (arq == NULL)
     exit(1);
 
-  //posiciona cursor no fim do arquivo
+  // posiciona cursor no fim do arquivo
   fseek(arq, 0, SEEK_END);
 
-  //armazena o tamanho do arquivo
+  // armazena o tamanho do arquivo
   tam = ftell(arq);
 
-  //seta o cursor para o inicio do arquivo
+  // seta o cursor para o inicio do arquivo
   rewind(arq);
 
-  //fecha arquivo
+  // fecha arquivo
   fclose(arq);
 
-  //abre arquivo
+  // abre arquivo
   arq = fopen(namefile, "rb");
-  
-  //caso falha na abertura, encerra programa
+
+  // caso falha na abertura, encerra programa
   if (arq == NULL)
     exit(1);
 
-  //le as informacoes, enquanto nao exceder o tamanho do arquivo
+  // le as informacoes, enquanto nao exceder o tamanho do arquivo
   while (j * (2 * ORDEM * sizeof(Registro)) < tam)
   {
 
-    //posiciona cursor no j-esimo registro a ser lido
+    // posiciona cursor no j-esimo registro a ser lido
     fseek(arq, j * (2 * ORDEM * sizeof(Registro)), SEEK_SET);
 
-    //le o registro
+    // le o registro
     fread(Reg, 2 * ORDEM * sizeof(Registro), 1, arq);
 
-
-    //armazena cada registro em uma lista
+    // armazena cada registro em uma lista
     for (i = 0; i < 2 * ORDEM; i++)
     {
+      // valida para caso de registro nulo (chave == 0)
       if (Reg[i].chave > 0)
         execut(Reg[i], LISTA);
     }
     j++;
   }
 
-  //fecha arquivo
+  // fecha arquivo
   fclose(arq);
+
   tmp = LISTA->prox;
   while (tmp != NULL)
   {
@@ -734,10 +775,8 @@ void recuperarReg(Apontador *arv, node *LISTA)
   }
   free(tmp);
   free(LISTA);
-  // Imprime(*arv, 2*ORDEM, 0);
 }
 
-//percorre a arvore a partir da pagina especificada, salvando os registros no arquivo
 void saveAux(Apontador p, int Nivel)
 {
   int i, j;
@@ -745,52 +784,56 @@ void saveAux(Apontador p, int Nivel)
   if (p == NULL)
     return;
 
-  //salva os registros da pagina atual no arquivo
+  // salva os registros da pagina atual no arquivo
   for (i = 0; i < p->n; i++)
     salvar(p, p->r);
 
-  //acessa todos as paginas filhas da pagina atual
+  // acessa todas as paginas filhas da pagina atual
   for (j = 0; j <= p->n; j++)
     saveAux(p->p[j], Nivel + 1);
 }
 
-//salva os registros no arquivo
 void salvar(Apontador pagina, Registro Reg[])
 {
 
   FILE *arq;
 
-  //se arquivo nao existe
+  // se arquivo nao existe
   if (!file_exists(namefile))
   {
-    //abre arquivo
+    // cria e abre o arquivo
     arq = fopen(namefile, "wb");
+
+    // caso abertura falhou, encerra programa
     if (arq == NULL)
       exit(1);
 
-    //posiciona cursor na posicao onde serao salvos os registros
+    // posiciona cursor na posicao onde serao salvos os registros
     fseek(arq, pagina->pageNum * (2 * ORDEM * sizeof(Registro)), SEEK_SET);
 
-    //escreve registros no arquivo
+    // escreve registros no arquivo
     fwrite(Reg, (2 * ORDEM * sizeof(Registro)), 1, arq);
 
-    //fecha arquivo
+    // fecha arquivo
     fclose(arq);
   }
 
   else
   {
+    // abre arquivo
     arq = fopen(namefile, "r+b");
+
+    // caso abertura falhou, encerra programa
     if (arq == NULL)
       exit(1);
 
-    //posiciona cursor na posicao onde serao salvos os registros
+    // posiciona cursor na posicao onde serao salvos os registros
     fseek(arq, pagina->pageNum * (2 * ORDEM * sizeof(Registro)), SEEK_SET);
 
-    //escreve registros no arquivo
+    // escreve registros no arquivo
     fwrite(Reg, (2 * ORDEM * sizeof(Registro)), 1, arq);
 
-    //fecha arquivo
+    // fecha arquivo
     fclose(arq);
   }
 }
@@ -849,6 +892,7 @@ void exibe(node *LISTA)
 
 void execut(Registro info, node *LISTA)
 {
+  // insere registro no inicio da lista
   insereInicio(info, LISTA);
 }
 // ############################# //Estrutura 2 lista encadeada
@@ -862,8 +906,9 @@ int main()
   arv = (Apontador *)malloc(sizeof(Apontador));
   node *LISTA = (node *)malloc(sizeof(node));
   Inicializa(arv);
-  inicia(LISTA); 
-  if (file_exists(namefile)) {
+  inicia(LISTA);
+  if (file_exists(namefile))
+  {
     recuperarReg(arv, LISTA);
   }
   printf("i - insercao \n");
