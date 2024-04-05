@@ -360,10 +360,13 @@ void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontad
   for (j = ORDEM + 2; j <= 2 * ORDEM; j++)
     InsereNaPagina(ApTemp, Ap->r[j - 1], Ap->p[j]);
 
+  // adiciona nova pagina como filho a direita do registro que foi inserido
   Ap->n = ORDEM;
   ApTemp->p[0] = Ap->p[ORDEM + 1];
   *RegRetorno = Ap->r[ORDEM];
   *ApRetorno = ApTemp;
+
+  // caso a pagina tenha sido dividida, atualiza o apontador direito da pagina p
   for (j = ORDEM; j < Ap->n + 2; j++)
   {
     Aux.chave = 0;
@@ -510,6 +513,7 @@ void InsPosFile(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, 
   cont++;
   ApTemp->pageNum = cont;
 
+  
   if (i <= ORDEM + 1)
   {
     InsereNaPagina(ApTemp, Ap->r[2 * ORDEM - 1], Ap->p[2 * ORDEM]);
@@ -657,6 +661,7 @@ void Ret(int Ch, Apontador *Ap, int *Diminuiu)
   Apontador WITH;
   Registro Reg;
 
+  
   if (*Ap == NULL)
   {
     printf("chave nao encontrada: %i\n", Ch);
@@ -748,10 +753,10 @@ void recuperarReg(Apontador *arv, node *LISTA)
   while (j * (2 * ORDEM * sizeof(Registro)) < tam)
   {
 
-    // posiciona cursor no j-esimo registro a ser lido
+    // posiciona cursor na j-esima pagina
     fseek(arq, j * (2 * ORDEM * sizeof(Registro)), SEEK_SET);
 
-    // le o registro
+    // realiza leiura na j-esima pagina
     fread(Reg, 2 * ORDEM * sizeof(Registro), 1, arq);
 
     // armazena cada registro em uma lista
@@ -767,12 +772,19 @@ void recuperarReg(Apontador *arv, node *LISTA)
   // fecha arquivo
   fclose(arq);
 
+  
   tmp = LISTA->prox;
+
+  //percorre lista, contruindo a arvore a partir dos registros armazenados nela
   while (tmp != NULL)
   {
+
+    //chama funcao para inserir os registros na arvore
     InsertPosFile(tmp->info, arv);
     tmp = tmp->prox;
   }
+
+  //libera lista
   free(tmp);
   free(LISTA);
 }
