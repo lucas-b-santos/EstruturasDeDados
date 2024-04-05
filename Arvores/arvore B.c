@@ -61,7 +61,7 @@ int isleaf(Apontador a);
 // verifica se o arquivo ja existe
 int file_exists(const char *filename);
 
-// Percorre arvore ate encontrar pagina ideal (caso exista) para inserir
+// Percorre arvore ate encontrar pagina ideal (caso exista) para inserir, ou cria nova caso necessario
 void Insere(Registro Reg, Apontador *Ap);
 
 // Insere registro na posicao correta dentro da pagina
@@ -71,9 +71,16 @@ void InsereNaPagina(Apontador Ap, Registro Reg, Apontador ApDir);
 void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontador *ApRetorno);
 int Imprime2(Apontador p, int Nivel, int aux, int n);
 int Imprime(Apontador p, int N, int aux, int n);
+
+//Exatamente igual a funcao insere, porem nao salva pagina no arquivo, apenas adiciona registro na pagina ideal
 void InsertPosFile(Registro Reg, Apontador *Ap);
+
 node *busca(Registro info, node *LISTA);
+
+//Exatamente igual a funcao Ins
 void InsPosFile(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontador *ApRetorno);
+
+
 void pos_ordem(Apontador raiz);
 void Retira(int Ch, Apontador *Ap);
 void Ret(int Ch, Apontador *Ap, int *Diminuiu);
@@ -201,12 +208,15 @@ void em_ordem(Apontador raiz)
   int i;
   if (raiz != NULL)
   {
+    //exibe todas as chaves da respectiva pagina
     for (i = 0; i < raiz->n; i++)
     {
+
       em_ordem(raiz->p[i]);
       printf("%d ", raiz->r[i].chave);
       printf("\n");
     }
+    
     em_ordem(raiz->p[i]);
   }
 }
@@ -335,16 +345,11 @@ void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontad
   cont++;
   ApTemp->pageNum = cont;
 
-  // caso registro deve ser inserido ate segunda metade das chaves da pagina
+  // validacao para saber se registro ficara na pagina nova ou na pagina atual
   if (i <= ORDEM + 1)
   {
-    // adiciona ultimo elemento na nova pagina
     InsereNaPagina(ApTemp, Ap->r[2 * ORDEM - 1], Ap->p[2 * ORDEM]);
-
-    // decrementa quantidade de elementos dentro da pagina que vai ser inserido novo registro
     Ap->n--;
-
-    // insere novo registro na pagina
     InsereNaPagina(Ap, *RegRetorno, *ApRetorno);
   }
 
