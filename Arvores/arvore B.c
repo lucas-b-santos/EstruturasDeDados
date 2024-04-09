@@ -27,9 +27,9 @@ typedef struct Pagina_str *Apontador;
 // Estrutura da pagina
 typedef struct Pagina_str
 {
-  int n;                      // quantidade de registros armazenados na pagina
-  int pageNum;                // indice da pagina dentro do arquivo
-  int num;                    //
+  int n;       // quantidade de registros armazenados na pagina
+  int pageNum; // indice da pagina dentro do arquivo
+  int num;
   Registro r[2 * ORDEM];      // registros armazenados na pagina
   Apontador p[2 * ORDEM + 1]; // ponteiros que apontam para as paginas filhas
 } Pagina;
@@ -50,6 +50,7 @@ void Antecessor(Apontador Ap, int Ind, Apontador ApPai, int *Diminuiu);
 // Realiza busca de um registro no arquivo
 void Busca(Registro Reg, Apontador Ap);
 
+// exibe paginas em ordem crescente
 void em_ordem(Apontador raiz);
 
 // acessa uma pagina dentro do arquivo e busca um registro dentro dela
@@ -72,18 +73,24 @@ void Ins(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontad
 int Imprime2(Apontador p, int Nivel, int aux, int n);
 int Imprime(Apontador p, int N, int aux, int n);
 
-//Exatamente igual a funcao insere, porem nao salva pagina no arquivo, apenas adiciona registro na pagina ideal
+// Exatamente igual a funcao insere, porem nao salva pagina no arquivo, apenas adiciona registro na pagina ideal
 void InsertPosFile(Registro Reg, Apontador *Ap);
 
+//busca o ultimo no inserido na lista, para assim setar seu proximo para o novo no inserido
 node *busca(Registro info, node *LISTA);
 
-//Exatamente igual a funcao Ins
+// Exatamente igual a funcao Ins
 void InsPosFile(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, Apontador *ApRetorno);
 
-
 void pos_ordem(Apontador raiz);
+
+//inicializa retirada de um registro da arvore
 void Retira(int Ch, Apontador *Ap);
+
+//encontra registro dentro da arvore e executa devidas operacoes de retirada
 void Ret(int Ch, Apontador *Ap, int *Diminuiu);
+
+//executa operacoes na arvore apos remover, de maneira a manter as propriedades da arvore-B
 void Reconstitui(Apontador ApPag, Apontador ApPai, int PosPai, int *Diminuiu);
 
 // percorre uma subarvore, de maneira a salvar todas as paginas a partir dela dentro do arquivo
@@ -136,7 +143,7 @@ void Antecessor(Apontador Ap, int Ind, Apontador ApPai, int *Diminuiu)
   // decrementa o contador de elementos na pagina pai
   ApPai->n--;
 
-  // atualiza flag "Diminuiu", usada para verificar se a remocao excedeu limite de elementos na pagina pai
+  // atualiza flag "Diminuiu"
   *Diminuiu = ApPai->n < ORDEM;
 } /* Antecessor */
 
@@ -208,7 +215,7 @@ void em_ordem(Apontador raiz)
   int i;
   if (raiz != NULL)
   {
-    //exibe todas as chaves da respectiva pagina
+    // exibe todas as chaves da respectiva pagina
     for (i = 0; i < raiz->n; i++)
     {
 
@@ -216,7 +223,7 @@ void em_ordem(Apontador raiz)
       printf("%d ", raiz->r[i].chave);
       printf("\n");
     }
-    
+
     em_ordem(raiz->p[i]);
   }
 }
@@ -504,7 +511,7 @@ void InsPosFile(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, 
 
   if (!*Cresceu)
     return;
-    
+
   if (Ap->n < 2 * ORDEM)
   { /* Verificando se a pagina tem espaco */
     InsereNaPagina(Ap, *RegRetorno, *ApRetorno);
@@ -518,7 +525,6 @@ void InsPosFile(Registro Reg, Apontador Ap, int *Cresceu, Registro *RegRetorno, 
   cont++;
   ApTemp->pageNum = cont;
 
-  
   if (i <= ORDEM + 1)
   {
     InsereNaPagina(ApTemp, Ap->r[2 * ORDEM - 1], Ap->p[2 * ORDEM]);
@@ -666,7 +672,7 @@ void Ret(int Ch, Apontador *Ap, int *Diminuiu)
   Apontador WITH;
   Registro Reg;
 
-  
+  // Apontador nulo, chave nao encontrada
   if (*Ap == NULL)
   {
     printf("chave nao encontrada: %i\n", Ch);
@@ -675,17 +681,31 @@ void Ret(int Ch, Apontador *Ap, int *Diminuiu)
   }
   WITH = *Ap;
   Ind = 1;
+
+  // busca chave dentro da pagina atual
   while (Ind < WITH->n && Ch > WITH->r[Ind - 1].chave)
     Ind++;
+
+  // encontrou chave na pagina
   if (Ch == WITH->r[Ind - 1].chave)
   {
+
+    // seta informacoes para nulo no registro a ser retirado
     Reg.chave = 0;
     Reg.rank = 0;
     WITH->r[Ind - 1] = Reg;
+
+    // verifica se apontador a esquerda do registro retirado eh nulo
     if (WITH->p[Ind - 1] == NULL)
     { /* Pagina folha */
+
+      // decrementa contador de elementos
       WITH->n--;
+
+      // indica que pagina esta subcarregada
       *Diminuiu = WITH->n < ORDEM;
+
+      // desloca registros e ponteiros para a esquerda
       for (j = Ind; j <= WITH->n; j++)
       {
         WITH->r[j - 1] = WITH->r[j];
@@ -693,14 +713,24 @@ void Ret(int Ch, Apontador *Ap, int *Diminuiu)
       }
       return;
     }
+
+    // busca antecessor do registro removido
     Antecessor(*Ap, Ind, WITH->p[Ind - 1], Diminuiu);
+
+    // caso diminuiu em altura
     if (*Diminuiu)
       Reconstitui(WITH->p[Ind - 1], *Ap, Ind - 1, Diminuiu);
     return;
   }
+ 
+  //chave esta na ultima pagina filha (mais a direita)
   if (Ch > WITH->r[Ind - 1].chave)
     Ind++;
+
+  //chama recursao na pagina filha
   Ret(Ch, &WITH->p[Ind - 1], Diminuiu);
+
+  // caso diminuiu em altura
   if (*Diminuiu)
     Reconstitui(WITH->p[Ind - 1], *Ap, Ind - 1, Diminuiu);
 } /* Ret */
@@ -777,19 +807,18 @@ void recuperarReg(Apontador *arv, node *LISTA)
   // fecha arquivo
   fclose(arq);
 
-  
   tmp = LISTA->prox;
 
-  //percorre lista, contruindo a arvore a partir dos registros armazenados nela
+  // percorre lista, contruindo a arvore a partir dos registros armazenados nela
   while (tmp != NULL)
   {
 
-    //chama funcao para inserir os registros na arvore
+    // chama funcao para inserir os registros na arvore
     InsertPosFile(tmp->info, arv);
     tmp = tmp->prox;
   }
 
-  //libera lista
+  // libera lista
   free(tmp);
   free(LISTA);
 }
