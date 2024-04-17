@@ -61,32 +61,7 @@ private:
       return BLACK;
     }
 
-    return (no)->getColor();
-  }
-
-  int retornaAltura(No *no) const
-  {
-    if (no == 0)
-    {
-      return -1;
-    }
-
-    int altEsq = retornaAltura(no->getEsq());
-    int altDir = retornaAltura(no->getDir());
-
-    if (altEsq > altDir)
-    {
-      return altEsq + 1;
-    }
-    else
-    {
-      return altDir + 1;
-    }
-  }
-
-  int fatorBalanceamento(No *raiz) const
-  {
-    return retornaAltura(raiz->getDir()) - retornaAltura(raiz->getEsq());
+    return no->getColor();
   }
 
   No *rotacaoSimplesL(No **no)
@@ -120,7 +95,7 @@ private:
     No *filhoR = (*no)->getDir();
 
     (*no)->trocaCor();
-    if (filhoR->getEsq()->getColor())
+    if (retornaCor(filhoR->getEsq()) == RED)
     {
       (*no)->setDir(rotacaoSimplesR(&filhoR));
       *no = rotacaoSimplesL(no);
@@ -133,7 +108,7 @@ private:
   No *move2DirRED(No **no)
   {
     (*no)->trocaCor();
-    if ((*no)->getEsq()->getEsq()->getColor())
+    if (retornaCor((*no)->getEsq()->getEsq()) == RED)
     {
       *no = rotacaoSimplesR(no);
       (*no)->trocaCor();
@@ -147,88 +122,18 @@ private:
     No *filhoL = (*no)->getEsq();
 
     // no vermelho eh sempre filho a esquerda
-    if (filhoR->getColor())
+    if (retornaCor(filhoR) == RED)
       *no = rotacaoSimplesL(no);
 
     // Filho da direita e neto da esquerda sao vermelhos
-    if (filhoL && filhoR->getColor() && filhoL->getEsq()->getColor())
+    if (filhoL != 0 && retornaCor(filhoR) == RED && retornaCor(filhoL->getEsq()) == RED)
       *no = rotacaoSimplesR(no);
 
     // 2 filhos vermelhos: troca cor!
-    if (filhoL->getColor() && filhoR->getColor())
+    if (retornaCor(filhoL) == RED && retornaCor(filhoR) == RED)
       (*no)->trocaCor();
 
     return *no;
-  }
-
-  void auxRotacoes(No **no, No **pai)
-  {
-    if (fatorBalanceamento(*no) > 1)
-    {
-      No *filhoR = (*no)->getDir();
-
-      if (fatorBalanceamento(filhoR) < 0)
-      {
-        cout << "Realiza dupla para a esquerda em " << (*no)->getChave()
-             << endl;
-
-        // Dupla para a esquerda (RL)
-        (*no)->setDir(rotacaoSimplesR(&filhoR));
-        if (pai == 0)
-          rotacaoSimplesL(no);
-        else if ((*pai)->getDir() == *no)
-          (*pai)->setDir(rotacaoSimplesL(no));
-        else
-          (*pai)->setEsq(rotacaoSimplesL(no));
-      }
-
-      else
-      {
-        cout << "Realiza simples para a esquerda em " << (*no)->getChave()
-             << endl;
-
-        // Simples para esquerda (RR)
-        if (pai == 0)
-          rotacaoSimplesL(no);
-        else if ((*pai)->getDir() == *no)
-          (*pai)->setDir(rotacaoSimplesL(no));
-        else
-          (*pai)->setEsq(rotacaoSimplesL(no));
-      }
-    }
-
-    else if (fatorBalanceamento(*no) < -1)
-
-    {
-      No *filhoL = (*no)->getEsq();
-
-      if (fatorBalanceamento(filhoL) > 0)
-      {
-        cout << "Realiza dupla para a direita em " << (*no)->getChave() << endl;
-
-        // Dupla para a Direita (LR)
-        (*no)->setEsq(rotacaoSimplesL(&filhoL));
-        if (pai == 0)
-          rotacaoSimplesR(no);
-        else if ((*pai)->getDir() == *no)
-          (*pai)->setDir(rotacaoSimplesR(no));
-        else
-          (*pai)->setEsq(rotacaoSimplesR(no));
-      }
-      else
-      {
-        cout << "Realiza simples para a direita em " << (*no)->getChave()
-             << endl;
-
-        // Simples para a Direita (LL)
-        if (pai == 0)
-          rotacaoSimplesR(no);
-        else if ((*pai)->getDir() == *no)
-          (*pai)->setDir(rotacaoSimplesR(no));
-        else
-          (*pai)->setEsq(rotacaoSimplesR(no));
-      }
-    }
   }
 
   No *inserirAux(No **no, int chave, int *resp)
@@ -295,77 +200,90 @@ private:
     return no1;
   }
 
-  int removeAux(No **no, No **pai, int chave)
+  No *removerMenor(No **no)
   {
-    if (*no == 0)
+
+    No *filhoL = *no;
+    if (filhoL == 0)
+    {
+      free(*no);
       return 0;
+    }
+    if (retornaCor(filhoL) == BLACK && retornaCor(filhoL->getEsq()) == BLACK)
+      *no = move2EsqRED(no);
 
-    int res;
+    filhoL = removerMenor(&filhoL);
+    (*no)->setEsq(filhoL);
+    return balancear(no);
+  }
 
-    No *filhoL = (*no)->getEsq();
-    No *filhoR = (*no)->getDir();
-
+  No *removeAux(No **no, int chave)
+  {
     if (chave < (*no)->getChave())
     {
-      if ((res = removeAux(&filhoL, no, chave)) == 1)
-        auxRotacoes(no, pai);
+      No *filhoL = (*no)->getEsq();
+
+      if (retornaCor(filhoL) == BLACK && filhoL)
+        if (retornaCor(filhoL->getEsq()) == BLACK)
+          *no = move2EsqRED(no);
+
+      filhoL = (*no)->getEsq();
+      (*no)->setEsq(removeAux(&filhoL, chave));
     }
-
-    if ((*no)->getChave() < chave)
+    else
     {
-      if ((res = removeAux(&filhoR, no, chave)) == 1)
-        auxRotacoes(no, pai);
-    }
+      if (retornaCor((*no)->getEsq()) == RED)
+        *no = rotacaoSimplesR(no);
 
-    if ((*no)->getChave() == chave)
-    {
-      bool flag, flag2 = false;
-
-      if (pai)
+      if (chave == (*no)->getChave() && !(*no)->getDir())
       {
-        flag2 = true;
-
-        if ((*pai)->getDir() == (*no))
-          flag = true;
-        else
-          flag = false;
+        free(*no);
+        return 0;
       }
 
-      if ((*no)->getEsq() == 0 ||
-          (*no)->getDir() == 0)
-      { // no tem um 1 filho ou nenhum
+      No *filhoR = (*no)->getDir();
 
-        No *oldnode = *no;
+      if (retornaCor(filhoR) == BLACK && filhoR)
+        if (retornaCor(filhoR->getEsq()) == BLACK)
+          *no = move2DirRED(no);
 
-        if ((*no)->getEsq() != 0)
-          (*no) = (*no)->getEsq();
-        else
-          (*no) = (*no)->getDir();
+      filhoR = (*no)->getDir();
 
-        free(oldnode);
-
-        if (!flag2)
-          return 1;
-
-        if (flag)
-          (*pai)->setDir(*no);
-        else
-          (*pai)->setEsq(*no);
+      if (chave == (*no)->getChave())
+      {
+        No *x = procuraMenor(filhoR);
+        (*no)->setChave(x->getChave());
+        (*no)->setDir(removerMenor(&filhoR));
       }
       else
-      { // no tem 2 filhos
-        No *tmp = procuraMenor((*no)->getDir());
-        (*no)->setChave(tmp->getChave());
-        removeAux(&filhoR, no, (*no)->getChave());
-        auxRotacoes(no, pai);
-      }
-      return 1;
+        filhoR->setDir(removeAux(&filhoR, chave));
     }
-    return res;
+    return balancear(no);
+  }
+
+  void consultaAux(No *no, int chave, int *res) const
+  {
+    if (no != 0)
+    {
+      if (no->getChave() == chave)
+      {
+        *res = 1;
+        return;
+      }
+      consultaAux(no->getEsq(), chave, res);
+      consultaAux(no->getDir(), chave, res);
+    }
   }
 
 public:
   ArvoreRB() { raiz = 0; }
+
+  int consulta(int chave) const
+  {
+    int res = 0;
+    consultaAux(raiz, chave, &res);
+    return res;
+  }
 
   int inserir(int chave)
 
@@ -382,8 +300,13 @@ public:
 
   bool remover(int chave)
   {
-    if (removeAux(&raiz, 0, chave))
+    if (consulta(chave))
+    {
+      raiz = removeAux(&raiz, chave);
+      if (raiz)
+        raiz->setColor(BLACK);
       return true;
+    }
     else
       return false;
   }
