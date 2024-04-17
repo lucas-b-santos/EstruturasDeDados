@@ -203,7 +203,7 @@ private:
   No *removerMenor(No **no)
   {
 
-    No *filhoL = *no;
+    No *filhoL = (*no)->getEsq();
     if (filhoL == 0)
     {
       free(*no);
@@ -219,45 +219,85 @@ private:
 
   No *removeAux(No **no, int chave)
   {
+    cout << "acessando no " << (*no)->getChave() << endl;
+
     if (chave < (*no)->getChave())
     {
       No *filhoL = (*no)->getEsq();
 
       if (retornaCor(filhoL) == BLACK && filhoL)
         if (retornaCor(filhoL->getEsq()) == BLACK)
+        {
           *no = move2EsqRED(no);
+          cout << "esquerdo de " << (*no)->getChave() << " eh preto e esquerdo do esquerdo eh preto" << endl;
+        }
 
       filhoL = (*no)->getEsq();
       (*no)->setEsq(removeAux(&filhoL, chave));
     }
     else
     {
+      cout << "teste 1" << endl;
+
       if (retornaCor((*no)->getEsq()) == RED)
+      {
         *no = rotacaoSimplesR(no);
+        cout << "esquerdo de " << (*no)->getChave() << " eh vermelho, rotacao para direita em " << (*no)->getChave() << endl;
+      }
+
+      cout << "teste 2" << endl;
 
       if (chave == (*no)->getChave() && !(*no)->getDir())
       {
+        cout << "no encontrado: " << (*no)->getChave() << ", nao possui filho a direita, libera no e retona 0 " << endl;
+
         free(*no);
         return 0;
       }
+
+      cout << "teste 3" << endl;
 
       No *filhoR = (*no)->getDir();
 
       if (retornaCor(filhoR) == BLACK && filhoR)
         if (retornaCor(filhoR->getEsq()) == BLACK)
+        {
           *no = move2DirRED(no);
+
+          cout << "no " << (*no)->getChave() << "possui filho direito preto e filho esquerdo do direito preto" << endl;
+        }
+
+      cout << "teste 4" << endl;
 
       filhoR = (*no)->getDir();
 
       if (chave == (*no)->getChave())
       {
+        preOrdem(raiz);
         No *x = procuraMenor(filhoR);
+        cout << "teste a, menor filho = " << x->getChave() << endl;
+
         (*no)->setChave(x->getChave());
+        cout << "teste b" << endl;
+
+        preOrdem(raiz);
+
         (*no)->setDir(removerMenor(&filhoR));
+
+        preOrdem(raiz);
       }
       else
+      {
         filhoR->setDir(removeAux(&filhoR, chave));
+      }
+
+      // preOrdem(raiz);
+
+      cout << "teste 5" << endl;
     }
+    
+    cout << "balanceando no " << (*no)->getChave() << endl;
+
     return balancear(no);
   }
 
