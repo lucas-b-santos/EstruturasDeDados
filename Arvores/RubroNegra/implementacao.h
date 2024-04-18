@@ -123,15 +123,28 @@ private:
 
     // no vermelho eh sempre filho a esquerda
     if (retornaCor(filhoR) == RED)
+    {
       *no = rotacaoSimplesL(no);
+      filhoR = (*no)->getDir();
+      filhoL = (*no)->getEsq();
+      cout << "direito de " << (*no)->getChave() << " eh vermelho, rotaciona " << (*no)->getChave() << " para esquerda" << endl;
+    }
 
     // Filho da direita e neto da esquerda sao vermelhos
     if (filhoL != 0 && retornaCor(filhoR) == RED && retornaCor(filhoL->getEsq()) == RED)
+    {
       *no = rotacaoSimplesR(no);
+      filhoR = (*no)->getDir();
+      filhoL = (*no)->getEsq();
+      cout << "Filho da direita e neto da esquerda de " << (*no)->getChave() << " sao vermelhos, rotaciona " << (*no)->getChave() << " para esquerda" << endl;
+    }
 
     // 2 filhos vermelhos: troca cor!
     if (retornaCor(filhoL) == RED && retornaCor(filhoR) == RED)
+    {
       (*no)->trocaCor();
+      cout << "Os dois filhos de " << (*no)->getChave() << " sao vermelhos, troca cor de " << (*no)->getChave() << endl;
+    }
 
     return *no;
   }
@@ -210,7 +223,10 @@ private:
       return 0;
     }
     if (retornaCor(filhoL) == BLACK && retornaCor(filhoL->getEsq()) == BLACK)
+    {
       *no = move2EsqRED(no);
+      filhoL = (*no)->getEsq();
+    }
 
     filhoL = removerMenor(&filhoL);
     (*no)->setEsq(filhoL);
@@ -219,20 +235,24 @@ private:
 
   No *removeAux(No **no, int chave)
   {
+
+    No *filhoL = (*no)->getEsq();
+    No *filhoR = (*no)->getDir();
+
     cout << "acessando no " << (*no)->getChave() << endl;
 
     if (chave < (*no)->getChave())
     {
-      No *filhoL = (*no)->getEsq();
 
       if (retornaCor(filhoL) == BLACK && filhoL)
         if (retornaCor(filhoL->getEsq()) == BLACK)
         {
-          *no = move2EsqRED(no);
           cout << "esquerdo de " << (*no)->getChave() << " eh preto e esquerdo do esquerdo eh preto" << endl;
+          cout << "move " << (*no)->getChave() << " para esquerda" << endl;
+          *no = move2EsqRED(no);
+          filhoL = (*no)->getEsq();
         }
 
-      filhoL = (*no)->getEsq();
       (*no)->setEsq(removeAux(&filhoL, chave));
     }
     else
@@ -241,8 +261,12 @@ private:
 
       if (retornaCor((*no)->getEsq()) == RED)
       {
-        *no = rotacaoSimplesR(no);
         cout << "esquerdo de " << (*no)->getChave() << " eh vermelho, rotacao para direita em " << (*no)->getChave() << endl;
+        *no = rotacaoSimplesR(no);
+        filhoL = (*no)->getEsq();
+        filhoR = (*no)->getDir();
+
+        preOrdem(raiz);
       }
 
       cout << "teste 2" << endl;
@@ -250,26 +274,26 @@ private:
       if (chave == (*no)->getChave() && !(*no)->getDir())
       {
         cout << "no encontrado: " << (*no)->getChave() << ", nao possui filho a direita, libera no e retona 0 " << endl;
-
         free(*no);
         return 0;
       }
 
       cout << "teste 3" << endl;
 
-      No *filhoR = (*no)->getDir();
-
       if (retornaCor(filhoR) == BLACK && filhoR)
         if (retornaCor(filhoR->getEsq()) == BLACK)
         {
-          *no = move2DirRED(no);
+          cout << "no " << (*no)->getChave() << " possui filho direito preto e filho esquerdo do direito preto, move "
+               << (*no)->getChave() << " para direita" << endl;
 
-          cout << "no " << (*no)->getChave() << "possui filho direito preto e filho esquerdo do direito preto" << endl;
+          *no = move2DirRED(no);
+          filhoL = (*no)->getEsq();
+          filhoR = (*no)->getDir();
+
+          preOrdem(raiz);
         }
 
       cout << "teste 4" << endl;
-
-      filhoR = (*no)->getDir();
 
       if (chave == (*no)->getChave())
       {
@@ -295,10 +319,11 @@ private:
 
       cout << "teste 5" << endl;
     }
-    
+
     cout << "balanceando no " << (*no)->getChave() << endl;
 
-    return balancear(no);
+    // return balancear(no);
+    return *no;
   }
 
   void consultaAux(No *no, int chave, int *res) const
