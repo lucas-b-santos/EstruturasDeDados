@@ -17,10 +17,14 @@ int main()
     arvore.inserir(insercoes[i]);
 
   cout << "==========================" << endl;
+  arvore.preOrdem(arvore.getRaiz());
+  cout << "==========================" << endl;
 
   for (int i = 0; i < LENGTH; i++)
-    if (arvore.remover(insercoes[i]))
-      cout << insercoes[i] << " removido..." << endl;
+    if (arvore.remover(insercoes[i])) {
+      cout << insercoes[i] << " removido..." << endl;                          
+      arvore.preOrdem(arvore.getRaiz());
+    }
 
   do
   {
