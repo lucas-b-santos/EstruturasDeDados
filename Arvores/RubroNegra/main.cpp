@@ -18,8 +18,9 @@ int main()
 
   cout << "==========================" << endl;
 
-  // for (int i = 0; i < LENGTH; i++)
-  //   arvore.remover(insercoes[i]);
+  for (int i = 0; i < LENGTH; i++)
+    if (arvore.remover(insercoes[i]))
+      cout << insercoes[i] << " removido..." << endl;
 
   do
   {

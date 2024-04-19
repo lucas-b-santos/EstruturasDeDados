@@ -95,10 +95,15 @@ private:
     No *filhoR = (*no)->getDir();
 
     (*no)->trocaCor();
+    cout << "Troca cor de " << (*no)->getChave() << endl;
     if (retornaCor(filhoR->getEsq()) == RED)
     {
+      cout << "Filho esquerdo de " << filhoR->getChave() << " eh vermelho, rotaciona "
+           << filhoR->getChave() << " para direita" << endl;
       (*no)->setDir(rotacaoSimplesR(&filhoR));
+      cout << "Rotaciona " << (*no)->getChave() << " para esquerda" << endl;
       *no = rotacaoSimplesL(no);
+      cout << "Troca cor de " << (*no)->getChave() << endl;
       (*no)->trocaCor();
     }
 
@@ -108,9 +113,15 @@ private:
   No *move2DirRED(No **no)
   {
     (*no)->trocaCor();
+    cout << "Troca cor de " << (*no)->getChave() << endl;
+
     if (retornaCor((*no)->getEsq()->getEsq()) == RED)
     {
+      cout << "Rotaciona " << (*no)->getChave() << " para esquerda" << endl;
+
       *no = rotacaoSimplesR(no);
+      cout << "Troca cor de " << (*no)->getChave() << endl;
+
       (*no)->trocaCor();
     }
     return *no;
@@ -257,28 +268,20 @@ private:
     }
     else
     {
-      cout << "teste 1" << endl;
-
       if (retornaCor((*no)->getEsq()) == RED)
       {
         cout << "esquerdo de " << (*no)->getChave() << " eh vermelho, rotacao para direita em " << (*no)->getChave() << endl;
         *no = rotacaoSimplesR(no);
         filhoL = (*no)->getEsq();
         filhoR = (*no)->getDir();
-
-        preOrdem(raiz);
       }
-
-      cout << "teste 2" << endl;
 
       if (chave == (*no)->getChave() && !(*no)->getDir())
       {
-        cout << "no encontrado: " << (*no)->getChave() << ", nao possui filho a direita, libera no e retona 0 " << endl;
+        cout << "no " << (*no)->getChave() << " nao possui filho a direita, libera no e retona 0 " << endl;
         free(*no);
         return 0;
       }
-
-      cout << "teste 3" << endl;
 
       if (retornaCor(filhoR) == BLACK && filhoR)
         if (retornaCor(filhoR->getEsq()) == BLACK)
@@ -289,41 +292,19 @@ private:
           *no = move2DirRED(no);
           filhoL = (*no)->getEsq();
           filhoR = (*no)->getDir();
-
-          preOrdem(raiz);
         }
-
-      cout << "teste 4" << endl;
 
       if (chave == (*no)->getChave())
       {
-        preOrdem(raiz);
         No *x = procuraMenor(filhoR);
-        cout << "teste a, menor filho = " << x->getChave() << endl;
-
         (*no)->setChave(x->getChave());
-        cout << "teste b" << endl;
-
-        preOrdem(raiz);
-
         (*no)->setDir(removerMenor(&filhoR));
-
-        preOrdem(raiz);
       }
       else
-      {
-        filhoR->setDir(removeAux(&filhoR, chave));
-      }
-
-      // preOrdem(raiz);
-
-      cout << "teste 5" << endl;
+        (*no)->setDir(removeAux(&filhoR, chave));
     }
 
-    cout << "balanceando no " << (*no)->getChave() << endl;
-
-    // return balancear(no);
-    return *no;
+    return balancear(no);
   }
 
   void consultaAux(No *no, int chave, int *res) const
