@@ -16,18 +16,20 @@ int main()
   for (int i = 0; i < LENGTH; i++)
     arvore.inserir(insercoes[i]);
 
-  cout << "==========================" << endl;
-  arvore.preOrdem(arvore.getRaiz());
-  cout << "==========================" << endl;
+  // cout << "==========================" << endl;
+  // arvore.preOrdem(arvore.getRaiz());
+  // cout << "==========================" << endl;
 
-  for (int i = 0; i < LENGTH; i++)
-    if (arvore.remover(insercoes[i])) {
-      cout << insercoes[i] << " removido..." << endl;                          
-      arvore.preOrdem(arvore.getRaiz());
-    }
+  // for (int i = 0; i < LENGTH; i++)
+  //   if (arvore.remover(insercoes[i]))
+  //   {
+  //     cout << insercoes[i] << " removido..." << endl;
+  //     arvore.preOrdem(arvore.getRaiz());
+  //   }
 
   do
   {
+    cout << "==========================" << endl;
     cout << "Escolha a acao:" << endl
          << "1:inserir" << endl
          << "2:imprimir pre ordem" << endl
@@ -35,9 +37,11 @@ int main()
          << "4:imprimir pos ordem" << endl
          << "5:remover" << endl
          << "6:consultar" << endl
-         << "0:sair" << endl;
-    cout << "Opcao: ";
+         << "0:sair" << endl
+         << "Opcao: ";
+
     cin >> op;
+    cout << "==========================" << endl;
 
     switch (op)
     {
@@ -46,9 +50,9 @@ int main()
       cin >> chave;
 
       if (arvore.inserir(chave))
-        cout << "Inserido com sucesso...";
+        cout << "Elemento inserido com sucesso: " << chave;
       else
-        cout << "Chave ja existe...";
+        cout << "Elemento ja existe na arvore: " << chave;
 
       cout << endl;
       break;
@@ -89,9 +93,9 @@ int main()
         cout << "Digite o numero da chave: ";
         cin >> chave;
         if (arvore.remover(chave))
-          cout << "Removido com sucesso..." << endl;
+          cout << "Chave removida com sucesso: " << chave << endl;
         else
-          cout << "Chave nao encontrada..." << endl;
+          cout << "Chave nao encontrada: " << chave << endl;
       }
       break;
 
@@ -105,7 +109,7 @@ int main()
         if (arvore.consulta(chave))
           cout << "Elemento existe na arvore: " << chave << endl;
         else
-          cout << "Elemento nao encontrado..." << endl;
+          cout << "Elemento nao encontrado: " << chave << endl;
       }
       break;
 
